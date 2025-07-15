@@ -6,9 +6,9 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 
-public class Player extends Sprite {
+public class Player2 extends Sprite {
 
-    private static final int START_X = 270;
+    private static final int START_X = 370; // Slightly offset from Player 1
     private static final int START_Y = 540;
 
     private double vx = 0;
@@ -26,7 +26,6 @@ public class Player extends Sprite {
     private int width;
     private Rectangle bounds = new Rectangle(175, 135, 17, 32);
 
-    // Animation
     private final int SCALE_FACTOR = 2;
     private Image[] idleFrames = new Image[2];
     private Image[] leftFrames = new Image[2];
@@ -34,7 +33,7 @@ public class Player extends Sprite {
 
     private int currentFrame = 0;
     private int frameCounter = 0;
-    private final int frameDelay = 4   ;
+    private final int frameDelay = 4;
 
     private enum State {
         IDLE, TURNING_LEFT, TURNING_RIGHT
@@ -42,20 +41,18 @@ public class Player extends Sprite {
 
     private State currentState = State.IDLE;
 
-    public Player() {
+    public Player2() {
         initPlayer();
     }
 
     private void initPlayer() {
-        // Load idle animation
+        // Load animation frames
         idleFrames[0] = loadScaledImage("src/images/sprite_1.png", SCALE_FACTOR);
         idleFrames[1] = loadScaledImage("src/images/sprite_2.png", SCALE_FACTOR);
 
-        // Load left turn animation
         leftFrames[0] = loadScaledImage("src/images/turnleft.png", SCALE_FACTOR);
         leftFrames[1] = loadScaledImage("src/images/turnleft2.png", SCALE_FACTOR);
 
-        // Load right turn animation
         rightFrames[0] = loadScaledImage("src/images/turnright.png", SCALE_FACTOR);
         rightFrames[1] = loadScaledImage("src/images/turnright2.png", SCALE_FACTOR);
 
@@ -132,21 +129,24 @@ public class Player extends Sprite {
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT) {
+        if (key == KeyEvent.VK_A) {
             ax = -ACCEL_X;
             currentState = State.TURNING_LEFT;
         }
-        if (key == KeyEvent.VK_RIGHT) {
+        if (key == KeyEvent.VK_D) {
             ax = ACCEL_X;
             currentState = State.TURNING_RIGHT;
         }
-        if (key == KeyEvent.VK_UP) {
+        if (key == KeyEvent.VK_W) {
             ay = -ACCEL_Y;
         }
-        if (key == KeyEvent.VK_DOWN) {
+        if (key == KeyEvent.VK_S) {
             ay = ACCEL_Y;
         }
-        if (key == KeyEvent.VK_SHIFT) {
+        if (key == KeyEvent.VK_F) {
+            // You can handle shooting in Scene1 when this key is pressed
+        }
+        if (key == KeyEvent.VK_G) {
             braking = true;
         }
     }
@@ -154,21 +154,21 @@ public class Player extends Sprite {
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT && ax < 0) {
+        if (key == KeyEvent.VK_A && ax < 0) {
             ax = 0;
             currentState = State.IDLE;
         }
 
-        if (key == KeyEvent.VK_RIGHT && ax > 0) {
+        if (key == KeyEvent.VK_D && ax > 0) {
             ax = 0;
             currentState = State.IDLE;
         }
 
-        if (key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) {
+        if (key == KeyEvent.VK_W || key == KeyEvent.VK_S) {
             ay = 0;
         }
 
-        if (key == KeyEvent.VK_SHIFT) {
+        if (key == KeyEvent.VK_G) {
             braking = false;
         }
     }
