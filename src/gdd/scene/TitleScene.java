@@ -31,13 +31,10 @@ public class TitleScene extends JPanel {
         // initTitle();
     }
 
-    private void initBoard() {
-
-    }
-
     public void start() {
         addKeyListener(new TAdapter());
         setFocusable(true);
+        requestFocusInWindow();  // Ensure focus for key input
         setBackground(Color.black);
 
         timer = new Timer(1000 / 60, new GameCycle());
@@ -61,58 +58,64 @@ public class TitleScene extends JPanel {
         }
     }
 
+    
     private void initTitle() {
         var ii = new ImageIcon(IMG_TITLE);
         image = ii.getImage();
-
     }
 
     private void initAudio() {
         try {
             String filePath = "src/audio/title.wav";
             audioPlayer = new AudioPlayer(filePath);
-
             audioPlayer.play();
         } catch (Exception e) {
             System.err.println("Error with playing sound.");
         }
-
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         doDrawing(g);
     }
 
     private void doDrawing(Graphics g) {
+    g.setColor(Color.black);
+    g.fillRect(0, 0, d.width, d.height);
 
-        g.setColor(Color.black);
-        g.fillRect(0, 0, d.width, d.height);
+    g.drawImage(image, 0, -15, d.width, d.height, this);
 
-        g.drawImage(image, 0, -80, d.width, d.height, this);
-
-        if (frame % 60 < 30) {
-            g.setColor(Color.red);
-        } else {
-            g.setColor(Color.white);
-        }
-
-        g.setFont(g.getFont().deriveFont(32f));
-        String text = "Press SPACE to Start";
-        int stringWidth = g.getFontMetrics().stringWidth(text);
-        int x = (d.width - stringWidth) / 2;
-        // int stringHeight = g.getFontMetrics().getAscent();
-        // int y = (d.height + stringHeight) / 2;
-        g.drawString(text, x, 600);
-
-        g.setColor(Color.gray);
-        g.setFont(g.getFont().deriveFont(10f));
-        g.drawString("Game by Chayapol", 10, 650);
-
-        Toolkit.getDefaultToolkit().sync();
+    if (frame % 60 < 30) {
+        g.setColor(Color.green);
+    } else {
+        g.setColor(Color.white);
     }
+
+    g.setFont(g.getFont().deriveFont(32f));
+    String text = "Press SPACE to Start";
+    int stringWidth = g.getFontMetrics().stringWidth(text);
+    int x = (d.width - stringWidth) / 2;
+    g.drawString(text, x, 420);
+
+    
+    
+    g.setColor(Color.green);
+    g.setFont(g.getFont().deriveFont(14f));
+    String teamTitle = "Team 2 Members:";
+    g.drawString(teamTitle, 10, 500);
+
+   
+    String[] members = {"Austin Tucker","Lizandro Campos"}; 
+    int y = 520;
+    for (String member : members) {
+        g.drawString(member, 20, y);
+        y += 20;
+    }
+
+    Toolkit.getDefaultToolkit().sync();
+}
+
 
     private void update() {
         frame++;
@@ -124,7 +127,6 @@ public class TitleScene extends JPanel {
     }
 
     private class GameCycle implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             doGameCycle();
@@ -132,21 +134,13 @@ public class TitleScene extends JPanel {
     }
 
     private class TAdapter extends KeyAdapter {
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-
-        }
-
         @Override
         public void keyPressed(KeyEvent e) {
-            System.out.println("Title.keyPressed: " + e.getKeyCode());
             int key = e.getKeyCode();
             if (key == KeyEvent.VK_SPACE) {
-                // Load the next scene
+                // Load the gameplay scene when space is pressed
                 game.loadScene2();
             }
-
         }
     }
 }
