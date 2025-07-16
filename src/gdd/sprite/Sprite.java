@@ -80,4 +80,12 @@ abstract public class Sprite {
     public boolean isDying() {
         return this.dying;
     }
+
+public int getWidth() {
+    return getImage().getWidth(null);
+}
+
+public int getHeight() {
+    return getImage().getHeight(null);
+}
 }

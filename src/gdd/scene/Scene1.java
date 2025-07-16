@@ -38,8 +38,17 @@ public class Scene1 extends JPanel {
     private List<Shot> shots;
     private Player player;
     private Player2 player2;
+    private long startTime;
+    private final long GAME_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
 
     // private Shot shot;
+    private final int BOMB_DROP_RATE = 60; // Every 60 frames (about 1 second at 60 FPS)
+    private final int BOMB_SPEED = 3; // Pixels per frame
+    private final Random bombRandom = new Random();
+
+    private int scoreP1 = 0;
+    private int scoreP2 = 0;
+
 
     final int BLOCKHEIGHT = 50;
     final int BLOCKWIDTH = 50;
@@ -343,6 +352,9 @@ public class Scene1 extends JPanel {
 
         g.setColor(Color.white);
         g.drawString("FRAME: " + frame, 10, 10);
+        g.drawString("Player 1 Score: " + scoreP1, 10, 30);
+        g.drawString("Player 2 Score: " + scoreP2, BOARD_WIDTH - 160, 30);
+
 
         g.setColor(Color.green);
 
@@ -354,6 +366,8 @@ public class Scene1 extends JPanel {
             drawAliens(g);
             drawPlayer(g);
             drawShot(g);
+            drawBombing(g);
+
 
         } else {
 
@@ -415,12 +429,7 @@ public class Scene1 extends JPanel {
             }
         }
 
-        if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
-            inGame = false;
-            timer.stop();
-            message = "Game won!";
-        }
-
+       
         // player
         player.act();
         player2.act();
@@ -441,6 +450,49 @@ public class Scene1 extends JPanel {
     if (enemy.isVisible()) {
         enemy.act(direction);
         enemy.animate(); // 🔄 Switch between enemy animation frames
+    }
+}
+
+    for (Enemy enemy : enemies) {
+    if (!enemy.isVisible()) continue;
+
+    Enemy.Bomb bomb = enemy.getBomb();
+
+    // Random bomb drop
+    if (bomb.isDestroyed() && frame % BOMB_DROP_RATE == 0 && bombRandom.nextInt(10) < 2) {
+        bomb.setDestroyed(false);
+        bomb.setX(enemy.getX() + ALIEN_WIDTH / 2);
+        bomb.setY(enemy.getY() + ALIEN_HEIGHT);
+    }
+
+    // Bomb movement
+    if (!bomb.isDestroyed()) {
+        bomb.setY(bomb.getY() + BOMB_SPEED);
+
+        // Collision with Player 1
+        if (player.isVisible()
+                && bomb.getX() >= player.getX()
+                && bomb.getX() <= player.getX() + PLAYER_WIDTH
+                && bomb.getY() >= player.getY()
+                && bomb.getY() <= player.getY() + PLAYER_HEIGHT) {
+            player.setDying(true);
+            bomb.setDestroyed(true);
+        }
+
+        // Collision with Player 2
+        if (player2.isVisible()
+                && bomb.getX() >= player2.getX()
+                && bomb.getX() <= player2.getX() + PLAYER_WIDTH
+                && bomb.getY() >= player2.getY()
+                && bomb.getY() <= player2.getY() + PLAYER_HEIGHT) {
+            player2.setDying(true);
+            bomb.setDestroyed(true);
+        }
+
+        // Bomb goes off screen
+        if (bomb.getY() > BOARD_HEIGHT) {
+            bomb.setDestroyed(true);
+        }
     }
 }
 
@@ -546,22 +598,22 @@ for (Enemy enemy : enemies) {
         player2.keyPressed(e);
 
         int key = e.getKeyCode();
+if (key == KeyEvent.VK_SPACE && inGame) {
+    int x = player.getX();
+    int y = player.getY();
+    if (shots.size() < 4) {
+        shots.add(new Shot(x, y, 1)); // Player 1
+    }
+}
 
-        if (key == KeyEvent.VK_SPACE && inGame) {
-            int x = player.getX();
-            int y = player.getY();
-            if (shots.size() < 4) {
-                shots.add(new Shot(x, y));
-            }
-        }
+if (key == KeyEvent.VK_F && inGame) {
+    int x = player2.getX();
+    int y = player2.getY();
+    if (shots.size() < 4) {
+        shots.add(new Shot(x, y, 2)); // Player 2
+    }
+}
 
-        if (key == KeyEvent.VK_F && inGame) {
-            int x = player2.getX();
-            int y = player2.getY();
-            if (shots.size() < 4) {
-                shots.add(new Shot(x, y));
-            }
-        }
     }
     }
 }
