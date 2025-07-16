@@ -437,11 +437,13 @@ public class Scene1 extends JPanel {
         }
 
         // Enemies
-        for (Enemy enemy : enemies) {
-            if (enemy.isVisible()) {
-                enemy.act(direction);
-            }
-        }
+       for (Enemy enemy : enemies) {
+    if (enemy.isVisible()) {
+        enemy.act(direction);
+        enemy.animate(); // 🔄 Switch between enemy animation frames
+    }
+}
+
 
         // shot
         List<Shot> shotsToRemove = new ArrayList<>();

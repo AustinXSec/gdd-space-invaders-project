@@ -16,11 +16,11 @@ public class Player2 extends Sprite {
     private double ax = 0;
     private double ay = 0;
 
-    private final double ACCEL_X = 0.7;
-    private final double ACCEL_Y = 0.4;
+    private final double ACCEL_X = 0.3;
+    private final double ACCEL_Y = 0.7;
     private final double MAX_SPEED_X = 9;
     private final double MAX_SPEED_Y = 6;
-    private final double FRICTION = 0.15;
+    private final double FRICTION = 0.40;
 
     private boolean braking = false;
     private int width;
@@ -47,14 +47,14 @@ public class Player2 extends Sprite {
 
     private void initPlayer() {
         // Load animation frames
-        idleFrames[0] = loadScaledImage("src/images/sprite_1.png", SCALE_FACTOR);
-        idleFrames[1] = loadScaledImage("src/images/sprite_2.png", SCALE_FACTOR);
+        idleFrames[0] = loadScaledImage("src/images/red_1.png", SCALE_FACTOR);
+        idleFrames[1] = loadScaledImage("src/images/red_2.png", SCALE_FACTOR);
 
-        leftFrames[0] = loadScaledImage("src/images/turnleft.png", SCALE_FACTOR);
-        leftFrames[1] = loadScaledImage("src/images/turnleft2.png", SCALE_FACTOR);
+        leftFrames[0] = loadScaledImage("src/images/redleftturn_1.png", SCALE_FACTOR);
+        leftFrames[1] = loadScaledImage("src/images/redleftturn_2.png", SCALE_FACTOR);
 
-        rightFrames[0] = loadScaledImage("src/images/turnright.png", SCALE_FACTOR);
-        rightFrames[1] = loadScaledImage("src/images/turnright2.png", SCALE_FACTOR);
+        rightFrames[0] = loadScaledImage("src/images/redrightturn_1.png", SCALE_FACTOR);
+        rightFrames[1] = loadScaledImage("src/images/redrightturn_2.png", SCALE_FACTOR);
 
         setImage(idleFrames[0]);
         setX(START_X);

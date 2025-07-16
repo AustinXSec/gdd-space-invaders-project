@@ -16,11 +16,11 @@ public class Player extends Sprite {
     private double ax = 0;
     private double ay = 0;
 
-    private final double ACCEL_X = 0.7;
-    private final double ACCEL_Y = 0.4;
+    private final double ACCEL_X = 0.3;
+    private final double ACCEL_Y = 0.7;
     private final double MAX_SPEED_X = 9;
     private final double MAX_SPEED_Y = 6;
-    private final double FRICTION = 0.15;
+    private final double FRICTION = 0.40;
 
     private boolean braking = false;
     private int width;
