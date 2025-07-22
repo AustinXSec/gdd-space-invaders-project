@@ -18,8 +18,18 @@ public class Player2 extends Sprite {
 
     private final double ACCEL_X = 0.7;
     private final double ACCEL_Y = 0.7;
-    private final double MAX_SPEED_X = 9;
-    private final double MAX_SPEED_Y = 6;
+
+    // Start slow speeds
+    private double maxSpeedX;
+    private double maxSpeedY;
+
+    public boolean hasSpeedUp = false;
+    private final double BASE_MAX_SPEED_X = 4;  // Slower start
+    private final double BASE_MAX_SPEED_Y = 3;
+
+    private final double NORMAL_MAX_SPEED_X = 10;  // Normal max speed after power-up
+    private final double NORMAL_MAX_SPEED_Y = 7;
+
     private final double FRICTION = 0.40;
 
     private boolean braking = false;
@@ -43,6 +53,8 @@ public class Player2 extends Sprite {
 
     public Player2() {
         initPlayer();
+        maxSpeedX = BASE_MAX_SPEED_X;
+        maxSpeedY = BASE_MAX_SPEED_Y;
     }
 
     private void initPlayer() {
@@ -88,9 +100,9 @@ public class Player2 extends Sprite {
             if (Math.abs(vy) < friction) vy = 0;
         }
 
-        // Clamp speed
-        vx = Math.max(-MAX_SPEED_X, Math.min(MAX_SPEED_X, vx));
-        vy = Math.max(-MAX_SPEED_Y, Math.min(MAX_SPEED_Y, vy));
+        // Clamp speed to maxSpeedX/Y
+        vx = Math.max(-maxSpeedX, Math.min(maxSpeedX, vx));
+        vy = Math.max(-maxSpeedY, Math.min(maxSpeedY, vy));
 
         // Move
         x += vx;
@@ -144,7 +156,7 @@ public class Player2 extends Sprite {
             ay = ACCEL_Y;
         }
         if (key == KeyEvent.VK_F) {
-            // You can handle shooting in Scene1 when this key is pressed
+            // Shooting handled elsewhere
         }
         if (key == KeyEvent.VK_G) {
             braking = true;
@@ -172,4 +184,27 @@ public class Player2 extends Sprite {
             braking = false;
         }
     }
+
+    // New methods for speed control
+    public void setMaxSpeed(double maxX, double maxY) {
+        this.maxSpeedX = maxX;
+        this.maxSpeedY = maxY;
+    }
+
+    public double getBaseMaxSpeedX() {
+        return BASE_MAX_SPEED_X;
+    }
+
+    public double getBaseMaxSpeedY() {
+        return BASE_MAX_SPEED_Y;
+    }
+
+    public double getNormalMaxSpeedX() {
+        return NORMAL_MAX_SPEED_X;
+    }
+
+    public double getNormalMaxSpeedY() {
+        return NORMAL_MAX_SPEED_Y;
+    }
 }
+

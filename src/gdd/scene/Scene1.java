@@ -122,6 +122,10 @@ public class Scene1 extends JPanel {
     private void loadSpawnDetails() {
         // TODO load this from a file
         spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", 100, 0));
+        spawnMap.put(600, new SpawnDetails("PowerUp-SpeedUp", 200, 0));
+        spawnMap.put(1000, new SpawnDetails("PowerUp-SpeedUp", 400, 0));
+
+
         spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
         spawnMap.put(300, new SpawnDetails("Alien1", 300, 0));
 
@@ -347,15 +351,26 @@ public class Scene1 extends JPanel {
 
     private void doDrawing(Graphics g) {
 
-        g.setColor(Color.black);
-        g.fillRect(0, 0, d.width, d.height);
+     // Set font for all texts
+    Font displayFont = new Font("Segoe UI Emoji", Font.PLAIN, 17);
+    g.setFont(displayFont);
 
-        g.setColor(Color.white);
-        g.drawString("FRAME: " + frame, 10, 10);
-        g.drawString("Player 1 Score: " + scoreP1, 10, 30);
-        g.drawString("Player 2 Score: " + scoreP2, BOARD_WIDTH - 160, 30);
+// Draw scores in white
+    g.setColor(Color.green);
+    g.drawString("FRAME: " + frame, 10, 30);
+    g.drawString("Player 1 Score: " + scoreP1, 10, 60);
+    g.drawString("Player 2 Score: " + scoreP2, BOARD_WIDTH - 220, 60);
 
+    // Draw Speed Up messages in green, same font
+    g.setColor(new Color(0, 153, 0));  // green color
+    if (player.hasSpeedUp) {
+        g.drawString("Speed Up +5 ⚡", 10, 90);
+    }
 
+    if (player2.hasSpeedUp) {
+        g.drawString("Speed Up +5 ⚡ ", BOARD_WIDTH - 220, 90);
+    }
+   
         g.setColor(Color.green);
 
         if (inGame) {
@@ -402,56 +417,54 @@ public class Scene1 extends JPanel {
 
     private void update() {
 
+    // Calculate max key in spawnMap for looping
+    int maxSpawnFrame = spawnMap.keySet().stream().max(Integer::compare).orElse(0);
 
-        // Check enemy spawn
-        // TODO this approach can only spawn one enemy at a frame
-        SpawnDetails sd = spawnMap.get(frame);
-        if (sd != null) {
-            // Create a new enemy based on the spawn details
-            switch (sd.type) {
-                case "Alien1":
-                    Enemy enemy = new Alien1(sd.x, sd.y);
-                    enemies.add(enemy);
-                    break;
-                // Add more cases for different enemy types if needed
-                case "Alien2":
-                    // Enemy enemy2 = new Alien2(sd.x, sd.y);
-                    // enemies.add(enemy2);
-                    break;
-                case "PowerUp-SpeedUp":
-                    // Handle speed up item spawn
-                    PowerUp speedUp = new SpeedUp(sd.x, sd.y);
-                    powerups.add(speedUp);
-                    break;
-                default:
-                    System.out.println("Unknown enemy type: " + sd.type);
-                    break;
-            }
+    // Loop frame count for spawn lookup
+    int loopedFrame = frame % (maxSpawnFrame + 1);
+
+    SpawnDetails sd = spawnMap.get(loopedFrame);
+    if (sd != null) {
+        switch (sd.type) {
+            case "Alien1":
+                Enemy enemy = new Alien1(sd.x, sd.y);
+                enemies.add(enemy);
+                break;
+            case "PowerUp-SpeedUp":
+                PowerUp speedUp = new SpeedUp(sd.x, sd.y);
+                powerups.add(speedUp);
+                break;
+            default:
+                System.out.println("Unknown enemy type: " + sd.type);
+                break;
         }
-
-       
-        // player
-        player.act();
-        player2.act();
-
-
-        // Power-ups
-        for (PowerUp powerup : powerups) {
-            if (powerup.isVisible()) {
-                powerup.act();
-                if (powerup.collidesWith(player)) {
-                    powerup.upgrade(player);
-                }
-            }
-        }
-
-        // Enemies
-       for (Enemy enemy : enemies) {
-    if (enemy.isVisible()) {
-        enemy.act(direction);
-        enemy.animate(); // 🔄 Switch between enemy animation frames
     }
-}
+
+    // player
+    player.act();
+    player2.act();
+
+    for (PowerUp powerup : powerups) {
+        if (powerup.isVisible()) {
+            powerup.act();
+            if (powerup.collidesWith(player)) {
+                ((SpeedUp) powerup).upgrade(player);
+            } else if (powerup.collidesWith(player2)) {
+                ((SpeedUp) powerup).upgrade(player2);
+            }
+        }
+    }
+
+    // enemies
+    for (Enemy enemy : enemies) {
+        if (enemy.isVisible()) {
+            enemy.act(direction);
+            enemy.animate(); // Switch enemy animation frames
+        }
+    }
+
+    // Clean up dead enemies to prevent list from growing infinitely
+    enemies.removeIf(enemy -> !enemy.isVisible() && enemy.isDying());
 
     for (Enemy enemy : enemies) {
     if (!enemy.isVisible()) continue;
@@ -497,48 +510,54 @@ public class Scene1 extends JPanel {
 }
 
 
-        // shot
-        List<Shot> shotsToRemove = new ArrayList<>();
-        for (Shot shot : shots) {
+      // shot
+List<Shot> shotsToRemove = new ArrayList<>();
+for (Shot shot : shots) {
 
-            if (shot.isVisible()) {
-                int shotX = shot.getX();
-                int shotY = shot.getY();
+    if (shot.isVisible()) {
+        int shotX = shot.getX();
+        int shotY = shot.getY();
 
-                for (Enemy enemy : enemies) {
-                    // Collision detection: shot and enemy
-                    int enemyX = enemy.getX();
-                    int enemyY = enemy.getY();
+        for (Enemy enemy : enemies) {
+            // Collision detection: shot and enemy
+            int enemyX = enemy.getX();
+            int enemyY = enemy.getY();
 
-                    if (enemy.isVisible() && shot.isVisible()
-                            && shotX >= (enemyX)
-                            && shotX <= (enemyX + ALIEN_WIDTH)
-                            && shotY >= (enemyY)
-                            && shotY <= (enemyY + ALIEN_HEIGHT)) {
+            if (enemy.isVisible() && shot.isVisible()
+                    && shotX >= (enemyX)
+                    && shotX <= (enemyX + ALIEN_WIDTH)
+                    && shotY >= (enemyY)
+                    && shotY <= (enemyY + ALIEN_HEIGHT)) {
 
-                        var ii = new ImageIcon(IMG_EXPLOSION);
-                        enemy.setImage(ii.getImage());
-                        enemy.setDying(true);
-                        explosions.add(new Explosion(enemyX, enemyY));
-                        deaths++;
-                        shot.die();
-                        shotsToRemove.add(shot);
-                    }
-                }
+                var ii = new ImageIcon(IMG_EXPLOSION);
+                enemy.setImage(ii.getImage());
+                enemy.setDying(true);
+                explosions.add(new Explosion(enemyX, enemyY));
+                deaths++;
+                shot.die();
+                shotsToRemove.add(shot);
 
-                int y = shot.getY();
-                // y -= 4;
-                y -= 20;
-
-                if (y < 0) {
-                    shot.die();
-                    shotsToRemove.add(shot);
-                } else {
-                    shot.setY(y);
+                // *** ADD THIS SCORE UPDATE ***
+                if (shot.getOwner() == 1) {
+                    scoreP1 += 100;
+                } else if (shot.getOwner() == 2) {
+                    scoreP2 += 100;
                 }
             }
         }
-        shots.removeAll(shotsToRemove);
+
+        int y = shot.getY();
+        y -= 20;
+
+        if (y < 0) {
+            shot.die();
+            shotsToRemove.add(shot);
+        } else {
+            shot.setY(y);
+        }
+    }
+}
+shots.removeAll(shotsToRemove);
 
         // enemies
 for (Enemy enemy : enemies) {
