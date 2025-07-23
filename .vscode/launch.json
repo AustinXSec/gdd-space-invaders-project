@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AudioPlayer",
+            "request": "launch",
+            "mainClass": "gdd.AudioPlayer",
+            "projectName": "gdd-space-invaders-project_f47e0ef7"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "gdd.Main",
