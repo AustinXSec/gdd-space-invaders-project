@@ -1,6 +1,6 @@
 package gdd.scene;
 
-
+import gdd.SoundEffects;
 import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
@@ -42,7 +42,7 @@ public class Scene1 extends JPanel {
     private final long GAME_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
 
     // private Shot shot;
-    private final int BOMB_DROP_RATE = 60; // Every 60 frames (about 1 second at 60 FPS)
+    private final int BOMB_DROP_RATE = 160; 
     private final int BOMB_SPEED = 3; // Pixels per frame
     private final Random bombRandom = new Random();
 
@@ -449,8 +449,10 @@ public class Scene1 extends JPanel {
             powerup.act();
             if (powerup.collidesWith(player)) {
                 ((SpeedUp) powerup).upgrade(player);
+                    SoundEffects.playPowerUp();
             } else if (powerup.collidesWith(player2)) {
                 ((SpeedUp) powerup).upgrade(player2);
+                    SoundEffects.playPowerUp();
             }
         }
     }
@@ -622,6 +624,7 @@ if (key == KeyEvent.VK_SPACE && inGame) {
     int y = player.getY();
     if (shots.size() < 4) {
         shots.add(new Shot(x, y, 1)); // Player 1
+        SoundEffects.playLaser();
     }
 }
 
@@ -630,6 +633,7 @@ if (key == KeyEvent.VK_F && inGame) {
     int y = player2.getY();
     if (shots.size() < 4) {
         shots.add(new Shot(x, y, 2)); // Player 2
+        SoundEffects.playLaser();
     }
 }
 

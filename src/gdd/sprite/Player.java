@@ -24,13 +24,13 @@ public class Player extends Sprite {
     private double maxSpeedY;
 
     public boolean hasSpeedUp = false;
-    private final double BASE_MAX_SPEED_X = 4;  // Slower start
-    private final double BASE_MAX_SPEED_Y = 3;
+    private final double BASE_MAX_SPEED_X = 2;  // Slower start
+    private final double BASE_MAX_SPEED_Y = 1;
 
-    private final double NORMAL_MAX_SPEED_X = 10;  // Normal max speed after power-up
-    private final double NORMAL_MAX_SPEED_Y = 7 ; 
+    private final double NORMAL_MAX_SPEED_X = 7;  // Normal max speed after power-up
+    private final double NORMAL_MAX_SPEED_Y = 6 ; 
 
-    private final double FRICTION = 0.80    ;
+    private final double FRICTION = 5 ;
 
     private boolean braking = false;
     private int width;
