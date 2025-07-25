@@ -1,9 +1,9 @@
 package gdd.scene;
 
-
 import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.SoundEffects;
 import gdd.SpawnDetails;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
@@ -38,17 +38,19 @@ public class Scene1 extends JPanel {
     private List<Shot> shots;
     private Player player;
     private Player2 player2;
-    private long startTime;
-    private final long GAME_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
-
+    
+    
     // private Shot shot;
-    private final int BOMB_DROP_RATE = 60; // Every 60 frames (about 1 second at 60 FPS)
+    private final int BOMB_DROP_RATE = 160; 
     private final int BOMB_SPEED = 3; // Pixels per frame
     private final Random bombRandom = new Random();
 
     private int scoreP1 = 0;
     private int scoreP2 = 0;
 
+
+    private final long GAME_DURATION_MS = 10 * 1000; 
+    private long startTime;
 
     final int BLOCKHEIGHT = 50;
     final int BLOCKWIDTH = 50;
@@ -73,27 +75,27 @@ public class Scene1 extends JPanel {
     private final int[][] MAP = {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0},
         {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
         {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
@@ -150,6 +152,9 @@ public class Scene1 extends JPanel {
         requestFocusInWindow();
         setBackground(Color.black);
 
+        startTime = System.currentTimeMillis();
+
+
         timer = new Timer(1000 / 60, new GameCycle());
         timer.start();
 
@@ -157,16 +162,18 @@ public class Scene1 extends JPanel {
         initAudio();
     }
 
-    public void stop() {
+  public void stop() {
+    if (timer != null) {
         timer.stop();
-        try {
-            if (audioPlayer != null) {
-                audioPlayer.stop();
-            }
-        } catch (Exception e) {
-            System.err.println("Error closing audio player.");
-        }
     }
+    try {
+        if (audioPlayer != null) {
+            audioPlayer.stop();
+        }
+    } catch (Exception e) {
+        System.err.println("Error closing audio player.");
+    }
+}
 
     private void gameInit() {
 
@@ -416,6 +423,13 @@ public class Scene1 extends JPanel {
     }
 
     private void update() {
+        long elapsedTime = System.currentTimeMillis() - startTime;
+if (elapsedTime >= GAME_DURATION_MS) {
+    timer.stop();
+    game.loadScene2();  // Switch to Scene2
+    return;  // Exit early to avoid further updates
+}
+
 
     // Calculate max key in spawnMap for looping
     int maxSpawnFrame = spawnMap.keySet().stream().max(Integer::compare).orElse(0);
@@ -449,8 +463,10 @@ public class Scene1 extends JPanel {
             powerup.act();
             if (powerup.collidesWith(player)) {
                 ((SpeedUp) powerup).upgrade(player);
+                    SoundEffects.playPowerUp();
             } else if (powerup.collidesWith(player2)) {
                 ((SpeedUp) powerup).upgrade(player2);
+                    SoundEffects.playPowerUp();
             }
         }
     }
@@ -619,9 +635,10 @@ for (Enemy enemy : enemies) {
         int key = e.getKeyCode();
 if (key == KeyEvent.VK_SPACE && inGame) {
     int x = player.getX();
-    int y = player.getY();
+    int y = player.getY();  
     if (shots.size() < 4) {
         shots.add(new Shot(x, y, 1)); // Player 1
+        SoundEffects.playLaser();
     }
 }
 
@@ -630,9 +647,14 @@ if (key == KeyEvent.VK_F && inGame) {
     int y = player2.getY();
     if (shots.size() < 4) {
         shots.add(new Shot(x, y, 2)); // Player 2
+        SoundEffects.playLaser();
     }
 }
 
     }
     }
+    public Player getPlayer() {
+    return player;
+}
+
 }
