@@ -2,19 +2,19 @@ package gdd;
 
 public class Global {
     private Global() {
-        // Prevent instantiation
+        
     }
 
     public static final int SCALE_FACTOR = 3; // Scaling factor for sprites
 
     public static final int BOARD_WIDTH = 716; // Doubled from 358
-    public static final int BOARD_HEIGHT = 700; // Doubled from 350
+    public static final int BOARD_HEIGHT = 650; // Doubled from 350
     
     public static final int BLOCKWIDTH = 50;
     public static final int BLOCKHEIGHT = 50;
 
     public static final int BORDER_RIGHT = 60; // Doubled from 30
-    public static final int BORDER_LEFT = 10; // Doubled from 5
+    public static final int BORDER_LEFT = -18; // Doubled from 5
 
     public static final int GROUND = 580; // Doubled from 290
     public static final int BOMB_HEIGHT = 10; // Doubled from 5
@@ -33,6 +33,7 @@ public class Global {
     public static final int PLAYER_HEIGHT = 20; // Doubled from 10
 
     // Images
+     public static final String IMG_ENEMY2 = "src/images/alien.png";
     public static final String IMG_ENEMY = "src/images/Alien_1.png";
     public static final String IMG_POWERUP_MULTISHOT = "src/images/bullet.png";
     public static final String IMG_SHOT = "src/images/shot.png";

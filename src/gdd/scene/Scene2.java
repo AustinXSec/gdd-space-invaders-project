@@ -3,18 +3,21 @@ package gdd.scene;
 import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.sprite.Alien2;
 import gdd.sprite.BossEnemy;
 import gdd.sprite.Player;
 import gdd.sprite.Shot;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import javax.swing.JOptionPane;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class Scene2 extends AbstractGameScene {
 
-    private final int[][] MAP = {
+     private final int[][] MAP = {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0},
@@ -40,24 +43,27 @@ public class Scene2 extends AbstractGameScene {
         {0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1}
     };
-
     private Random rand = new Random();
     private BossEnemy boss;
     private long bossSpawnTime = -1;
     private boolean bossSpawned = false;
     private AudioPlayer audioPlayer;
+    private AudioPlayer missionCompleteAudio;
 
     private int scoreP1;
     private int scoreP2;
 
-    private boolean gameOver = false;
-    private boolean gameOverShown = false;
+    private List<Alien2> alien2s = new ArrayList<>();
+    private int alien2SpawnTimer = 0;
 
-    // --- Crater class and crater list ---
+    private boolean gameOver = false;
+    private boolean missionComplete = false;
+
+    private final List<Crater> craters = new ArrayList<>();
 
     private static class Crater {
         int x, y, width, height;
-        double speed; // pixels per frame
+        double speed;
 
         Crater(int x, int y, int width, int height, double speed) {
             this.x = x;
@@ -75,15 +81,12 @@ public class Scene2 extends AbstractGameScene {
         }
 
         void draw(Graphics2D g2d) {
-            Color craterColor = new Color(150, 80, 50, 150); // translucent reddish-brown
+            Color craterColor = new Color(150, 80, 50, 150);
             g2d.setColor(craterColor);
             g2d.fillOval(x, y, width, height);
         }
     }
 
-    private final List<Crater> craters = new ArrayList<>();
-
-    // Constructor
     public Scene2(Game game, Player player, int scoreP1, int scoreP2) {
         super(game);
         this.player = player;
@@ -92,27 +95,26 @@ public class Scene2 extends AbstractGameScene {
         setBackground(new Color(0xC86C41));
     }
 
-   // Initialize craters
-private void initCraters() {
-    craters.clear();
-    craters.add(new Crater(100, 100, 50, 25, 1.2));
-    craters.add(new Crater(400, 300, 70, 35, 1.0));
-    craters.add(new Crater(600, 500, 40, 20, 1.4));
-    craters.add(new Crater(300, 700, 60, 30, 1.1));
-    craters.add(new Crater(200, 150, 55, 27, 1.3));
-    craters.add(new Crater(500, 450, 45, 22, 1.0));
-    craters.add(new Crater(700, 600, 65, 32, 1.2));
-    craters.add(new Crater(20, 200, 50, 25, 1.0)); 
-    craters.add(new Crater(60, 350, 40, 20, 1.1)); 
-    craters.add(new Crater(30, 480, 45, 22, 1.2));   
-    craters.add(new Crater(80, 600, 55, 28, 1.3));  
-    craters.add(new Crater(100, 700, 50, 24, 1.0));  
-}
-
+     private void initCraters() {
+        craters.clear();
+        craters.add(new Crater(100, 100, 50, 25, 1.2));
+        craters.add(new Crater(400, 300, 70, 35, 1.0));
+        craters.add(new Crater(600, 500, 40, 20, 1.4));
+        craters.add(new Crater(300, 700, 60, 30, 1.1));
+        craters.add(new Crater(200, 150, 55, 27, 1.3));
+        craters.add(new Crater(500, 450, 45, 22, 1.0));
+        craters.add(new Crater(700, 600, 65, 32, 1.2));
+        craters.add(new Crater(20, 200, 50, 25, 1.0));
+        craters.add(new Crater(60, 350, 40, 20, 1.1));
+        craters.add(new Crater(30, 480, 45, 22, 1.2));
+        craters.add(new Crater(80, 600, 55, 28, 1.3));
+        craters.add(new Crater(100, 700, 50, 24, 1.0));
+    }
     @Override
     public void start() {
         super.start();
-
+        player.setMultiShotEnabled(true);
+        player2.setMultiShotEnabled(true);
         player.setMaxSpeed(5, 4);
         player2.setMaxSpeed(5, 4);
 
@@ -123,17 +125,21 @@ private void initCraters() {
         try {
             audioPlayer = new AudioPlayer("src/audio/BossSong.wav");
             audioPlayer.play();
-        } catch (Exception e) {
-            System.err.println("Scene2 music error: " + e.getMessage());
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            System.err.println("Audio error: " + e.getMessage());
         }
 
         gameOver = false;
-        gameOverShown = false;
+        missionComplete = false;
     }
 
     public void stop() {
         if (audioPlayer != null) {
-            audioPlayer.stop();
+            try {
+                audioPlayer.stop();
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                System.err.println("Error stopping audio: " + e.getMessage());
+            }
         }
         if (timer != null) {
             timer.stop();
@@ -146,24 +152,26 @@ private void initCraters() {
 
         drawAsteroidField(g);
 
-        // Draw craters independently
         Graphics2D g2d = (Graphics2D) g;
-        for (Crater crater : craters) {
-            crater.draw(g2d);
-        }
+        for (Crater crater : craters) crater.draw(g2d);
 
         drawPlayers(g);
         drawShots(g);
 
+        for (Alien2 alien2 : alien2s) {
+            if (alien2.isVisible()) {
+                g.drawImage(alien2.getImage(), alien2.getX(), alien2.getY(), this);
+            }
+        }
+
         if (bossSpawned && boss != null && boss.isVisible()) {
             g.drawImage(boss.getImage(), boss.getX(), boss.getY(), this);
 
-            // Boss health bar
             int barX = 150;
             int barY = 20;
             int barWidth = 400;
             int barHeight = 20;
-            int currentWidth = (int) ((boss.getHealth() / 10000.0f) * barWidth);
+            int currentWidth = (int) ((boss.getHealth() / 50000.0f) * barWidth);
 
             g.setColor(Color.DARK_GRAY);
             g.fillRect(barX, barY, barWidth, barHeight);
@@ -177,7 +185,7 @@ private void initCraters() {
             g.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
             g.drawString("Boss HP: " + boss.getHealth(), barX + 160, barY + 15);
 
-            g.setColor(Color.green);
+            g.setColor(Color.GREEN);
             g.drawString("FRAME: " + frame, 10, 30);
 
             g.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
@@ -185,26 +193,79 @@ private void initCraters() {
             g.drawString("Player 2 Score: " + scoreP2, BOARD_WIDTH - 220, 60);
         }
 
-        if (gameOver && !gameOverShown) {
-            gameOverShown = true;
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(this, "You got eaten!");
-                this.stop();        // Stop current game timer
-                game.loadScene2();  // Restart Scene2
-            });
+        if (gameOver || missionComplete) {
+            g.setColor(Color.black);
+            g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+
+            g.setColor(new Color(0, 32, 48));
+            g.fillRect(50, BOARD_WIDTH / 2 - 60, BOARD_WIDTH - 100, 110);
+            g.setColor(Color.white);
+            g.drawRect(50, BOARD_WIDTH / 2 - 60, BOARD_WIDTH - 100, 110);
+
+            Font font = new Font("Helvetica", Font.BOLD, 16);
+            FontMetrics fm = this.getFontMetrics(font);
+            g.setFont(font);
+            g.setColor(Color.white);
+
+            String message = gameOver ? "You got eaten!" : "Mission Complete!";
+            g.drawString(message, (BOARD_WIDTH - fm.stringWidth(message)) / 2, BOARD_WIDTH / 2 - 20);
+
+            if (missionComplete) {
+                String scoreMsg1 = "Player 1 Final Score: " + scoreP1;
+                String scoreMsg2 = "Player 2 Final Score: " + scoreP2;
+
+                g.drawString(scoreMsg1, (BOARD_WIDTH - fm.stringWidth(scoreMsg1)) / 2, BOARD_WIDTH / 2 + 10);
+                g.drawString(scoreMsg2, (BOARD_WIDTH - fm.stringWidth(scoreMsg2)) / 2, BOARD_WIDTH / 2 + 35);
+            }
         }
     }
 
     @Override
     protected void customUpdate() {
-        if (gameOver) return;
+        if (gameOver || missionComplete) return;
 
-        // Update craters independently
-        for (Crater crater : craters) {
-            crater.update();
-        }
+        for (Crater crater : craters) crater.update();
 
         long now = System.currentTimeMillis();
+
+       // Only spawn Alien2 enemies after the boss has entered
+if (boss != null && !boss.isEntering()) {
+     alien2SpawnTimer++;
+    if (alien2SpawnTimer > 120) {
+        int side = rand.nextInt(2);
+        
+        int alienHeight = 15 * SCALE_FACTOR;
+        int maxY = GROUND - alienHeight;
+        int minY = 40;
+        int y = rand.nextInt(maxY - minY) + minY;
+
+        int x = (side == 0) ? 0 : BOARD_WIDTH - 40;
+        int dx = (side == 0) ? 2 : -2;
+
+        alien2s.add(new Alien2(x, y, dx));
+        alien2SpawnTimer = 0;
+    }
+}
+
+        List<Alien2> toRemove = new ArrayList<>();
+        for (Alien2 alien : alien2s) {
+            alien.act(); 
+            if (alien.getX() < -40 || alien.getX() > BOARD_WIDTH + 40) {
+                toRemove.add(alien);
+            }
+
+            Rectangle alienBounds = new Rectangle(alien.getX(), alien.getY(), alien.getWidth(), alien.getHeight());
+            Rectangle p1Bounds = player.getHitbox();
+            Rectangle p2Bounds = player2.getHitbox();
+
+
+            if (alienBounds.intersects(p1Bounds) || alienBounds.intersects(p2Bounds)) {
+                gameOver = true;
+                if (timer != null) timer.stop();
+                return;
+            }
+        }
+        alien2s.removeAll(toRemove);
 
         if (!bossSpawned && now >= bossSpawnTime) {
             int startX = (BOARD_WIDTH / 2) - 64;
@@ -215,43 +276,39 @@ private void initCraters() {
         if (bossSpawned && boss != null && boss.isVisible()) {
             boss.move();
 
-            // Check boss collisions with players
             Rectangle bossBounds = new Rectangle(boss.getX(), boss.getY(), boss.getWidth(), boss.getHeight());
-            Rectangle player1Bounds = new Rectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight());
-            Rectangle player2Bounds = new Rectangle(player2.getX(), player2.getY(), player2.getWidth(), player2.getHeight());
-
-            if (bossBounds.intersects(player1Bounds) || bossBounds.intersects(player2Bounds)) {
+            Rectangle p1Bounds = player.getHitbox();
+            Rectangle p2Bounds = player2.getHitbox();
+            if (bossBounds.intersects(p1Bounds) || bossBounds.intersects(p2Bounds)) {
                 gameOver = true;
+                if (timer != null) timer.stop();
                 return;
             }
 
-            // Check boss collisions with shots
-            List<Shot> toRemove = new ArrayList<>();
+            List<Shot> toRemoveShots = new ArrayList<>();
             for (Shot shot : shots) {
                 if (!shot.isVisible()) continue;
-
                 Rectangle shotBounds = new Rectangle(shot.getX(), shot.getY(), 5, 10);
-
                 if (bossBounds.intersects(shotBounds)) {
                     boss.takeDamage(25);
                     shot.die();
-                    toRemove.add(shot);
-
-                    // Update score based on which player fired the shot
-                    if (shot.getOwner() == 1) {
-                        scoreP1 += 10;
-                    } else if (shot.getOwner() == 2) {
-                        scoreP2 += 10;
-                    }
+                    toRemoveShots.add(shot);
+                    if (shot.getOwner() == 1) scoreP1 += 10;
+                    else if (shot.getOwner() == 2) scoreP2 += 10;
                 }
             }
-            shots.removeAll(toRemove);
+            shots.removeAll(toRemoveShots);
+
+            if (boss.getHealth() <= 0) {
+                missionComplete = true;
+                if (timer != null) timer.stop();
+            }
         }
     }
 
     private void drawAsteroidField(Graphics g) {
-        int scrollOffset = (frame) % BLOCKHEIGHT;
-        int baseRow = (frame) / BLOCKHEIGHT;
+        int scrollOffset = frame % BLOCKHEIGHT;
+        int baseRow = frame / BLOCKHEIGHT;
         int rowsNeeded = (BOARD_HEIGHT / BLOCKHEIGHT) + 2;
 
         for (int screenRow = 0; screenRow < rowsNeeded; screenRow++) {
@@ -277,10 +334,9 @@ private void initCraters() {
         int cy = y + height / 2;
 
         g2d.fillOval(cx - 10, cy - 10, 20, 20);
-        g2d.fillOval(cx - 14, cy, 18, 18);
+        g2d.fillOval(cx - 14, cy, 18, 18);  
         g2d.fillOval(cx + 2, cy - 6, 16, 16);
         g2d.fillOval(cx - 5, cy + 4, 20, 20);
         g2d.fillOval(cx - 8, cy - 2, 14, 14);
-        
     }
 }

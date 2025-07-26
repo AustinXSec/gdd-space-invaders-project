@@ -34,11 +34,11 @@ public class BossEnemy {
     private boolean risingAfterDive = false;
     private final float risingSpeed = 2.0f;  // pixels per frame for rising
 
-    private int health = 10000;
+    private int health = 50000;
     private boolean dying = false;
 
     public BossEnemy(int startX) {
-        this.x = startX;
+        this.x = startX; 
         this.y = -100;
         this.visible = true;
 
@@ -47,7 +47,7 @@ public class BossEnemy {
     }
 
     private void loadFrames() {
-        frames = new Image[9];
+        frames = new Image[10];
         for (int i = 0; i < frames.length; i++) {
             String path = "src/images/boss" + i + ".png";
             Image img = new ImageIcon(path).getImage();
@@ -201,4 +201,9 @@ public class BossEnemy {
     public int getHeight() {
         return height;
     }
+
+
+public boolean isEntering() {
+    return entering;
+}
 }

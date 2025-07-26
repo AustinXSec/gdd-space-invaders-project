@@ -87,40 +87,51 @@ public class Player extends Sprite {
     }
 
     public void act() {
-        // Apply acceleration
-        vx += ax;
-        vy += ay;
+    // Apply acceleration
+    vx += ax;
+    vy += ay;
 
-        double friction = braking ? FRICTION * 3 : FRICTION;
+    double friction = braking ? FRICTION * 3 : FRICTION;
 
-        if (ax == 0) {
-            if (vx > 0) vx -= friction;
-            if (vx < 0) vx += friction;
-            if (Math.abs(vx) < friction) vx = 0;
-        }
-
-        if (ay == 0) {
-            if (vy > 0) vy -= friction;
-            if (vy < 0) vy += friction;
-            if (Math.abs(vy) < friction) vy = 0;
-        }
-
-        // Clamp speed to maxSpeedX/Y
-        vx = Math.max(-maxSpeedX, Math.min(maxSpeedX, vx));
-        vy = Math.max(-maxSpeedY, Math.min(maxSpeedY, vy));
-
-        // Move
-        x += vx;
-        y += vy;
-
-        // Keep inside window
-        if (x < 0) x = 0;
-        if (x > BOARD_WIDTH - width) x = BOARD_WIDTH - width;
-        if (y < 0) y = 0;
-        if (y > GROUND - PLAYER_HEIGHT) y = GROUND - PLAYER_HEIGHT;
-
-        updateAnimation();
+    if (ax == 0) {
+        if (vx > 0) vx -= friction;
+        if (vx < 0) vx += friction;
+        if (Math.abs(vx) < friction) vx = 0;
     }
+
+    if (ay == 0) {
+        if (vy > 0) vy -= friction;
+        if (vy < 0) vy += friction;
+        if (Math.abs(vy) < friction) vy = 0;
+    }
+
+    // Clamp speed to maxSpeedX/Y
+    vx = Math.max(-maxSpeedX, Math.min(maxSpeedX, vx));
+    vy = Math.max(-maxSpeedY, Math.min(maxSpeedY, vy));
+
+    // Move
+    x += vx;
+    y += vy;
+
+    // Keep inside window
+    if (x < BORDER_LEFT) x = BORDER_LEFT;
+    if (x > BOARD_WIDTH - width - BORDER_RIGHT) x = BOARD_WIDTH - width - BORDER_RIGHT;
+    if (y < 0) y = 0;
+    if (y > GROUND - PLAYER_HEIGHT) y = GROUND - PLAYER_HEIGHT;
+
+    updateAnimation();
+}
+
+public Rectangle getHitbox() {
+    int padding = 30; // Shrinks the hitbox
+    return new Rectangle(
+        getX() + padding,
+        getY() + padding,
+        getWidth() - 2 * padding,
+        getHeight() - 2 * padding
+    );
+}
+
 
     private void updateAnimation() {
         frameCounter++;
@@ -224,3 +235,4 @@ public void setMultiShotEnabled(boolean enabled) {
     this.multiShotEnabled = enabled;
 }
 }
+

@@ -79,12 +79,15 @@ public abstract class AbstractGameScene extends JPanel {
         List<Shot> toRemove = new ArrayList<>();
         for (Shot shot : shots) {
             if (!shot.isVisible()) continue;
-            int y = shot.getY() - 20;
-            if (y < 0) {
+
+            int newX = shot.getX() + shot.getDx();
+            int newY = shot.getY() - 20;
+            if (newY < 0) {
                 shot.die();
                 toRemove.add(shot);
             } else {
-                shot.setY(y);
+                shot.setX(newX);
+                shot.setY(newY);
             }
         }
         shots.removeAll(toRemove);
@@ -103,14 +106,31 @@ public abstract class AbstractGameScene extends JPanel {
             player2.keyPressed(e);
 
             if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                if (shots.size() < 4) {
-                    shots.add(new Shot(player.getX(), player.getY(), 1));
+                if (shots.size() < 10) {
+                    int centerX = player.getX() + player.getWidth() / 2 - 6;
+                    int y = player.getY();
+                    if (player.isMultiShotEnabled()) {
+                        shots.add(new Shot(centerX, y, 1));              // Center
+                        shots.add(new Shot(centerX - 15, y, 1, -1));     // Left
+                        shots.add(new Shot(centerX + 15, y, 1, 1));      // Right
+                    } else {
+                        shots.add(new Shot(centerX, y, 1));
+                    }
                     SoundEffects.playLaser();
                 }
             }
+
             if (e.getKeyCode() == KeyEvent.VK_F) {
-                if (shots.size() < 4) {
-                    shots.add(new Shot(player2.getX(), player2.getY(), 2));
+                if (shots.size() < 10) {
+                    int centerX = player2.getX() + player2.getWidth() / 2 - 6;
+                    int y = player2.getY();
+                    if (player2.isMultiShotEnabled()) {
+                        shots.add(new Shot(centerX, y, 2));              // Center
+                        shots.add(new Shot(centerX - 15, y, 2, -1));     // Left
+                        shots.add(new Shot(centerX + 15, y, 2, 1));      // Right
+                    } else {
+                        shots.add(new Shot(centerX, y, 2));
+                    }
                     SoundEffects.playLaser();
                 }
             }

@@ -46,6 +46,8 @@ public class Scene1 extends JPanel {
     private final int BOMB_SPEED = 3; // Pixels per frame
     private final Random bombRandom = new Random();
 
+
+
     private int scoreP1 = 0;
     private int scoreP2 = 0;
    
@@ -53,7 +55,7 @@ public class Scene1 extends JPanel {
     private static final int MAX_POWERUPS = 7;
 
 
-    private final long GAME_DURATION_MS = 5 * 60 * 1000; 
+    private final long GAME_DURATION_MS = 1* 1000; 
     private long startTime;
 
     final int BLOCKHEIGHT = 50;
@@ -78,15 +80,15 @@ public class Scene1 extends JPanel {
     private int mapOffset = 0;
     private final int[][] MAP = {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -95,11 +97,11 @@ public class Scene1 extends JPanel {
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0},
         {0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
         {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+        {0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
@@ -107,6 +109,8 @@ public class Scene1 extends JPanel {
     private AudioPlayer audioPlayer;
     private int lastRowToShow;
     private int firstRowToShow;
+  
+
 
     public Scene1(Game game) {
         this.game = game;
@@ -320,12 +324,21 @@ public class Scene1 extends JPanel {
 
     private void drawShot(Graphics g) {
 
+        List<Shot> toRemove = new ArrayList<>();
         for (Shot shot : shots) {
-
-            if (shot.isVisible()) {
-                g.drawImage(shot.getImage(), shot.getX(), shot.getY(), this);
+            if (!shot.isVisible()) continue;
+            g.drawImage(shot.getImage(), shot.getX(), shot.getY(), this);
+            int newX = shot.getX() + shot.getDx();
+            int newY = shot.getY() - 2   ;
+            if (newY < 0) {
+                shot.die();
+                toRemove.add(shot);
+            } else {
+                shot.setX(newX);
+                shot.setY(newY);
             }
         }
+        shots.removeAll(toRemove);
     }
 
     private void drawBombing(Graphics g) {
@@ -450,6 +463,28 @@ if (elapsedTime >= GAME_DURATION_MS) {
 
     // Loop frame count for spawn lookup
     int loopedFrame = frame % (maxSpawnFrame + 1);
+    // Respawn initial grid of enemies at intervals
+if (frame % 850== 0) { 
+    int groupWidth = 6 * (ALIEN_WIDTH + ALIEN_GAP);
+    int maxOffsetX = Math.max(0, BOARD_WIDTH - groupWidth);
+    int offsetX = randomizer.nextInt(maxOffsetX + 1);
+    int offsetY = randomizer.nextInt(50); // random vertical position near top
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 6; j++) {
+            int x = offsetX + (ALIEN_WIDTH + ALIEN_GAP) * j;   
+            int y = offsetY + (ALIEN_HEIGHT + ALIEN_GAP) * i;
+            enemies.add(new Enemy(x, y));
+        }
+    }
+}
+// Random Alien1 spawns independently of spawnMap
+if (frame % 200 == 0 && randomizer.nextInt(10) < 10) { 
+    int x = randomizer.nextInt(BOARD_WIDTH - ALIEN_WIDTH);
+    int y = -ALIEN_HEIGHT; // spawn above screen
+    enemies.add(new Alien1(x, y));
+}
+
 
     SpawnDetails sd = spawnMap.get(loopedFrame);
     if (sd != null) {
@@ -647,55 +682,72 @@ for (Enemy enemy : enemies) {
 
     private class TAdapter extends KeyAdapter {
 
+
+
+        protected void updateShots() {
+        List<Shot> toRemove = new ArrayList<>();
+        for (Shot shot : shots) {
+            if (!shot.isVisible()) continue;
+            int newX = shot.getX() + shot.getDx();
+            int newY = shot.getY() - 20;
+            if (newY < 0) {
+                shot.die();
+                toRemove.add(shot);
+            } else {
+                shot.setX(newX);
+                shot.setY(newY);
+            }
+        }
+        shots.removeAll(toRemove);
+    }
     @Override
     public void keyReleased(KeyEvent e) {
         player.keyReleased(e);
         player2.keyReleased(e);
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        player.keyPressed(e);
-        player2.keyPressed(e);
+   @Override
+public void keyPressed(KeyEvent e) {
+    player.keyPressed(e);
+    player2.keyPressed(e);
 
-        int key = e.getKeyCode();
-// Player 1 shooting
-if (key == KeyEvent.VK_SPACE && inGame) {
-    int centerX = player.getX() + player.getWidth() / 2 - 6;
-    int y = player.getY();
-    if (shots.size() < 10) {
-        if (player.isMultiShotEnabled()) {
-            shots.add(new Shot(centerX, y, 1));              // Center
-            shots.add(new Shot(centerX - 15, y, 1, -1));     // Left
-            shots.add(new Shot(centerX + 15, y, 1, 1));      // Right
-        } else {
-            shots.add(new Shot(centerX, y, 1)); // Normal
+    int key = e.getKeyCode();
+
+    // Player 1 shooting
+    if (key == KeyEvent.VK_SPACE && inGame) {
+        if (shots.size() < 10) {
+            int centerX = player.getX() + player.getWidth() / 2 - 6;
+            int y = player.getY();
+            if (player.isMultiShotEnabled()) {
+                shots.add(new Shot(centerX, y, 1));              // Center
+                shots.add(new Shot(centerX - 15, y, 1, -1));     // Left
+                shots.add(new Shot(centerX + 15, y, 1, 1));      // Right
+            } else {
+                shots.add(new Shot(centerX, y, 1));
+            }
+            SoundEffects.playLaser();
         }
-        SoundEffects.playLaser();
+    }
+
+    // Player 2 shooting
+    if (key == KeyEvent.VK_F && inGame) {
+        if (shots.size() < 10) {
+            int centerX = player2.getX() + player2.getWidth() / 2 - 6;
+            int y = player2.getY();
+            if (player2.isMultiShotEnabled()) {
+                shots.add(new Shot(centerX, y, 2));              // Center
+                shots.add(new Shot(centerX - 15, y, 2, -1));     // Left
+                shots.add(new Shot(centerX + 15, y, 2, 1));      // Right
+            } else {
+                shots.add(new Shot(centerX, y, 2));
+            }
+            SoundEffects.playLaser();
+        }
     }
 }
 
-
-
-if (key == KeyEvent.VK_F && inGame) {
-    int centerX = player2.getX() + player2.getWidth() / 2 - 6;
-    int y = player2.getY();
-    if (shots.size() < 10) {
-        if (player2.isMultiShotEnabled()) {
-            shots.add(new Shot(centerX, y, 2));
-            shots.add(new Shot(centerX - 15, y, 2, -1));
-            shots.add(new Shot(centerX + 15, y, 2, 1));
-        } else {
-            shots.add(new Shot(centerX, y, 2));
-        }
-        SoundEffects.playLaser();
-    }
 }
     
-
-
-    }
-    }
     public Player getPlayer() {
     return player;
 }
@@ -708,3 +760,5 @@ public int getScoreP2() {
 }
 
 }
+    
+
