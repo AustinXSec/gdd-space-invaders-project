@@ -23,6 +23,7 @@ public class Player2 extends Sprite {
     private double maxSpeedX;
     private double maxSpeedY;
     
+    private boolean multiShotEnabled = false;
 
     public boolean hasSpeedUp = false;
     private final double BASE_MAX_SPEED_X = 2;  // Slower start
@@ -207,5 +208,21 @@ public class Player2 extends Sprite {
     public double getNormalMaxSpeedY() {
         return NORMAL_MAX_SPEED_Y;
     }
+    public int getWidth() {
+    return getImage().getWidth(null);
+}
+
+public int getHeight() {
+    return getImage().getHeight(null);
+}
+
+public boolean isMultiShotEnabled() {
+    return multiShotEnabled;
+}
+
+public void setMultiShotEnabled(boolean enabled) {
+    this.multiShotEnabled = enabled;
+}
+
 }
 

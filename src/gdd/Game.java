@@ -48,17 +48,23 @@ public class Game extends JFrame {
     }
 
     public void loadScene2() {
-        // Stop Scene1 music & timer
-        if (scene1 != null) scene1.stop();
-
-        // Get player and start Scene2
-        Player currentPlayer = scene1.getPlayer();
-        scene2 = new Scene2(this, currentPlayer);
-
-        getContentPane().removeAll();
-        add(scene2);
-        scene2.start();
-        revalidate();
-        repaint();
+    if (scene1 != null) scene1.stop();
+    if (scene2 != null) {
+        scene2.stop();
+        getContentPane().remove(scene2);
+        scene2 = null;
     }
+
+    Player currentPlayer = scene1.getPlayer();
+
+    // Get scores from scene1 to pass them to scene2
+    int scoreP1 = scene1.getScoreP1();
+    int scoreP2 = scene1.getScoreP2();
+
+    scene2 = new Scene2(this, currentPlayer, scoreP1, scoreP2);
+    getContentPane().add(scene2);
+    scene2.start();
+    revalidate();
+    repaint();
+} 
 }

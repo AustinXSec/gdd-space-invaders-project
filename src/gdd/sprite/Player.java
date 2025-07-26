@@ -19,6 +19,8 @@ public class Player extends Sprite {
     private final double ACCEL_X = 0.7;
     private final double ACCEL_Y = 0.7;
 
+    private boolean multiShotEnabled = false;
+
     // Start slow speeds
     private double maxSpeedX;
     private double maxSpeedY;
@@ -206,4 +208,19 @@ public class Player extends Sprite {
     public double getNormalMaxSpeedY() {
         return NORMAL_MAX_SPEED_Y;
     }
+    public int getWidth() {
+    return getImage().getWidth(null);
+}
+
+public int getHeight() {
+    return getImage().getHeight(null);
+}
+
+public boolean isMultiShotEnabled() {
+    return multiShotEnabled;
+}
+
+public void setMultiShotEnabled(boolean enabled) {
+    this.multiShotEnabled = enabled;
+}
 }

@@ -5,6 +5,7 @@ import gdd.Game;
 import static gdd.Global.*;
 import gdd.SoundEffects;
 import gdd.SpawnDetails;
+import gdd.powerup.MultiShot;
 import gdd.powerup.PowerUp;
 import gdd.powerup.SpeedUp;
 import gdd.sprite.Alien1;
@@ -47,9 +48,12 @@ public class Scene1 extends JPanel {
 
     private int scoreP1 = 0;
     private int scoreP2 = 0;
+   
+    private int totalPowerUpsSpawned = 0;
+    private static final int MAX_POWERUPS = 7;
 
 
-    private final long GAME_DURATION_MS = 10 * 1000; 
+    private final long GAME_DURATION_MS = 5 * 60 * 1000; 
     private long startTime;
 
     final int BLOCKHEIGHT = 50;
@@ -126,6 +130,10 @@ public class Scene1 extends JPanel {
         spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", 100, 0));
         spawnMap.put(600, new SpawnDetails("PowerUp-SpeedUp", 200, 0));
         spawnMap.put(1000, new SpawnDetails("PowerUp-SpeedUp", 400, 0));
+        spawnMap.put(700, new SpawnDetails("PowerUp-MultiShot", 250, 0));
+        spawnMap.put(900, new SpawnDetails("PowerUp-MultiShot", 100, 0));
+        spawnMap.put(1300, new SpawnDetails("PowerUp-MultiShot", 350, 0));
+
 
 
         spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
@@ -369,15 +377,21 @@ public class Scene1 extends JPanel {
     g.drawString("Player 2 Score: " + scoreP2, BOARD_WIDTH - 220, 60);
 
     // Draw Speed Up messages in green, same font
-    g.setColor(new Color(0, 153, 0));  // green color
-    if (player.hasSpeedUp) {
-        g.drawString("Speed Up +5 ⚡", 10, 90);
-    }
+g.setColor(new Color(0, 153, 0));  // green color
+if (player.hasSpeedUp) {
+    g.drawString("Speed Up +5 ⚡", 10, 90);
+}
+if (player.isMultiShotEnabled()) {
+    g.drawString("Power Shot 🔫", 10, 115);
+}
 
-    if (player2.hasSpeedUp) {
-        g.drawString("Speed Up +5 ⚡ ", BOARD_WIDTH - 220, 90);
-    }
-   
+if (player2.hasSpeedUp) {
+    g.drawString("Speed Up +5 ⚡", BOARD_WIDTH - 220, 90);
+}
+if (player2.isMultiShotEnabled()) {
+    g.drawString("Power Shot 🔫", BOARD_WIDTH - 220, 115);
+}
+
         g.setColor(Color.green);
 
         if (inGame) {
@@ -439,20 +453,31 @@ if (elapsedTime >= GAME_DURATION_MS) {
 
     SpawnDetails sd = spawnMap.get(loopedFrame);
     if (sd != null) {
+    if (sd.type.startsWith("PowerUp") && totalPowerUpsSpawned >= MAX_POWERUPS) {
+        // Skip spawning more power-ups
+    } else {
         switch (sd.type) {
             case "Alien1":
-                Enemy enemy = new Alien1(sd.x, sd.y);
-                enemies.add(enemy);
+                enemies.add(new Alien1(sd.x, sd.y));
                 break;
+
             case "PowerUp-SpeedUp":
-                PowerUp speedUp = new SpeedUp(sd.x, sd.y);
-                powerups.add(speedUp);
+                powerups.add(new SpeedUp(sd.x, sd.y));
+                totalPowerUpsSpawned++;
                 break;
+
+            case "PowerUp-MultiShot":
+                powerups.add(new MultiShot(sd.x, sd.y));
+                totalPowerUpsSpawned++;
+                break;
+
             default:
-                System.out.println("Unknown enemy type: " + sd.type);
+                System.out.println("Unknown type: " + sd.type);
                 break;
         }
     }
+}
+
 
     // player
     player.act();
@@ -461,13 +486,14 @@ if (elapsedTime >= GAME_DURATION_MS) {
     for (PowerUp powerup : powerups) {
         if (powerup.isVisible()) {
             powerup.act();
-            if (powerup.collidesWith(player)) {
-                ((SpeedUp) powerup).upgrade(player);
-                    SoundEffects.playPowerUp();
-            } else if (powerup.collidesWith(player2)) {
-                ((SpeedUp) powerup).upgrade(player2);
-                    SoundEffects.playPowerUp();
-            }
+           if (powerup.collidesWith(player)) {
+    powerup.upgrade(player); // Works for both SpeedUp and MultiShot
+    SoundEffects.playPowerUp();
+} else if (powerup.collidesWith(player2)) {
+    powerup.upgrade(player2);
+    SoundEffects.playPowerUp();
+}
+
         }
     }
 
@@ -633,28 +659,52 @@ for (Enemy enemy : enemies) {
         player2.keyPressed(e);
 
         int key = e.getKeyCode();
+// Player 1 shooting
 if (key == KeyEvent.VK_SPACE && inGame) {
-    int x = player.getX();
-    int y = player.getY();  
-    if (shots.size() < 4) {
-        shots.add(new Shot(x, y, 1)); // Player 1
+    int centerX = player.getX() + player.getWidth() / 2 - 6;
+    int y = player.getY();
+    if (shots.size() < 10) {
+        if (player.isMultiShotEnabled()) {
+            shots.add(new Shot(centerX, y, 1));              // Center
+            shots.add(new Shot(centerX - 15, y, 1, -1));     // Left
+            shots.add(new Shot(centerX + 15, y, 1, 1));      // Right
+        } else {
+            shots.add(new Shot(centerX, y, 1)); // Normal
+        }
         SoundEffects.playLaser();
     }
 }
 
+
+
 if (key == KeyEvent.VK_F && inGame) {
-    int x = player2.getX();
+    int centerX = player2.getX() + player2.getWidth() / 2 - 6;
     int y = player2.getY();
-    if (shots.size() < 4) {
-        shots.add(new Shot(x, y, 2)); // Player 2
+    if (shots.size() < 10) {
+        if (player2.isMultiShotEnabled()) {
+            shots.add(new Shot(centerX, y, 2));
+            shots.add(new Shot(centerX - 15, y, 2, -1));
+            shots.add(new Shot(centerX + 15, y, 2, 1));
+        } else {
+            shots.add(new Shot(centerX, y, 2));
+        }
         SoundEffects.playLaser();
     }
 }
+    
+
 
     }
     }
     public Player getPlayer() {
     return player;
+}
+public int getScoreP1() {
+    return scoreP1;
+}
+
+public int getScoreP2() {
+    return scoreP2;
 }
 
 }
