@@ -32,9 +32,9 @@ public class BossEnemy {
     private int diveTimer = 0;
 
     private boolean risingAfterDive = false;
-    private final float risingSpeed = 2.0f;  // pixels per frame for rising
+    private final float risingSpeed = 2.0f;  
 
-    private int health = 50000;
+    private int health = 30000;
     private boolean dying = false;
 
     public BossEnemy(int startX) {
@@ -129,17 +129,16 @@ public class BossEnemy {
             dy = Math.abs(dy);
         }
 
-        // When dive ends, start rising smoothly
+       
         if (diveMode && diveTimer > diveDuration) {
             diveMode = false;
             risingAfterDive = true;
 
-            // Stop vertical velocity, we handle vertical movement manually now
             dy = 0;
         }
     }
 
-    // Animate frames as before...
+    
     animationCounter++;
     if (animationCounter >= animationSpeed) {
         animationCounter = 0;
@@ -148,7 +147,7 @@ public class BossEnemy {
         if (frames[currentFrame] != null) {
             image = frames[currentFrame];
         } else {
-            image = frames[0]; // fallback
+            image = frames[0];
         }
     }
 }
@@ -167,7 +166,7 @@ public class BossEnemy {
     public void die() {
         visible = false;
         dying = true;
-        // Add explosion animation or sound here if desired
+        
     }
 
     public boolean isVisible() {

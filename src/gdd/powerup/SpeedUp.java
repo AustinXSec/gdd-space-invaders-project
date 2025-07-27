@@ -2,7 +2,7 @@ package gdd.powerup;
 
 import static gdd.Global.*;
 import gdd.sprite.Player;
-import gdd.sprite.Player2;  // Import Player2 as well
+import gdd.sprite.Player2;  
 import javax.swing.ImageIcon;
 
 public class SpeedUp extends PowerUp {
@@ -18,7 +18,7 @@ public class SpeedUp extends PowerUp {
     }
 
     public void act() {
-        // Move down the screen
+        
         this.y += 2;
     }
 

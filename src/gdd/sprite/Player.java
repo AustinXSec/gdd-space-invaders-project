@@ -26,10 +26,10 @@ public class Player extends Sprite {
     private double maxSpeedY;
 
     public boolean hasSpeedUp = false;
-    private final double BASE_MAX_SPEED_X = 2;  // Slower start
+    private final double BASE_MAX_SPEED_X = 2; 
     private final double BASE_MAX_SPEED_Y = 1;
 
-    private final double NORMAL_MAX_SPEED_X = 7;  // Normal max speed after power-up
+    private final double NORMAL_MAX_SPEED_X = 7;  
     private final double NORMAL_MAX_SPEED_Y = 6 ; 
 
     private final double FRICTION = 5 ;
@@ -61,15 +61,15 @@ public class Player extends Sprite {
     }
 
     private void initPlayer() {
-        // Load idle animation
+     
         idleFrames[0] = loadScaledImage("src/images/sprite_1.png", SCALE_FACTOR);
         idleFrames[1] = loadScaledImage("src/images/sprite_2.png", SCALE_FACTOR);
 
-        // Load left turn animation
+        
         leftFrames[0] = loadScaledImage("src/images/turnleft.png", SCALE_FACTOR);
         leftFrames[1] = loadScaledImage("src/images/turnleft2.png", SCALE_FACTOR);
 
-        // Load right turn animation
+       
         rightFrames[0] = loadScaledImage("src/images/turnright.png", SCALE_FACTOR);
         rightFrames[1] = loadScaledImage("src/images/turnright2.png", SCALE_FACTOR);
 
@@ -105,7 +105,6 @@ public class Player extends Sprite {
         if (Math.abs(vy) < friction) vy = 0;
     }
 
-    // Clamp speed to maxSpeedX/Y
     vx = Math.max(-maxSpeedX, Math.min(maxSpeedX, vx));
     vy = Math.max(-maxSpeedY, Math.min(maxSpeedY, vy));
 
@@ -113,7 +112,7 @@ public class Player extends Sprite {
     x += vx;
     y += vy;
 
-    // Keep inside window
+    
     if (x < BORDER_LEFT) x = BORDER_LEFT;
     if (x > BOARD_WIDTH - width - BORDER_RIGHT) x = BOARD_WIDTH - width - BORDER_RIGHT;
     if (y < 0) y = 0;
@@ -123,7 +122,7 @@ public class Player extends Sprite {
 }
 
 public Rectangle getHitbox() {
-    int padding = 30; // Shrinks the hitbox
+    int padding = 30;
     return new Rectangle(
         getX() + padding,
         getY() + padding,

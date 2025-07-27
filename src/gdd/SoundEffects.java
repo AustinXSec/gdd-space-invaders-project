@@ -1,8 +1,8 @@
 package gdd;
 
-import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import javax.sound.sampled.*;
 
 public class SoundEffects {
 
@@ -39,7 +39,7 @@ public class SoundEffects {
             clip.open(audioIn);
             clip.start();
 
-            // Wait for clip to finish playing before closing resources
+           
             Thread.sleep(clip.getMicrosecondLength() / 10);
             clip.close();
             audioIn.close();

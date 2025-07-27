@@ -5,8 +5,8 @@ import javax.swing.ImageIcon;
 public class Shot extends Sprite {
 
     private final int speedY = 20;
-    private final int owner; // 1 = Player 1, 2 = Player 2
-    private int dx = 0;      // Direction offset for multi-shot (-1, 0, 1)
+    private final int owner; 
+    private int dx = 0;      
 
     public Shot(int x, int y, int owner) {
         this.x = x;
@@ -18,7 +18,6 @@ public class Shot extends Sprite {
         setImage(scaled);
     }
 
-    // Overloaded constructor for multi-shot with directional offset
     public Shot(int x, int y, int owner, int dx) {
         this(x, y, owner);
         this.dx = dx;
@@ -26,7 +25,7 @@ public class Shot extends Sprite {
 
     public void act() {
         y -= speedY;
-        x += dx * 5; // Horizontal movement for angled shots
+        x += dx * 5; 
 
         if (y < 0) {
             die();

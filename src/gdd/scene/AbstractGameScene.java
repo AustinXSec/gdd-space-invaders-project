@@ -105,7 +105,7 @@ public abstract class AbstractGameScene extends JPanel {
             player.keyPressed(e);
             player2.keyPressed(e);
 
-            if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (shots.size() < 10) {
                     int centerX = player.getX() + player.getWidth() / 2 - 6;
                     int y = player.getY();
@@ -120,7 +120,7 @@ public abstract class AbstractGameScene extends JPanel {
                 }
             }
 
-            if (e.getKeyCode() == KeyEvent.VK_F) {
+            if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (shots.size() < 10) {
                     int centerX = player2.getX() + player2.getWidth() / 2 - 6;
                     int y = player2.getY();
@@ -148,5 +148,5 @@ public abstract class AbstractGameScene extends JPanel {
         }
     }
 
-    protected abstract void customUpdate(); // Let subclasses define their own update logic
+    protected abstract void customUpdate(); 
 }

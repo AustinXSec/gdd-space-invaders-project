@@ -2,12 +2,15 @@ package gdd.scene;
 
 import gdd.AudioPlayer;
 import gdd.Game;
+import gdd.Global;
 import static gdd.Global.*;
 import gdd.sprite.Alien2;
 import gdd.sprite.BossEnemy;
 import gdd.sprite.Player;
 import gdd.sprite.Shot;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,34 +18,29 @@ import java.util.Random;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class Scene2 extends AbstractGameScene {
 
-     private final int[][] MAP = {
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
-        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
-        {0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1}
-    };
+public class Scene2 extends AbstractGameScene {
+ 
+     
+    private int[][] MAP; 
+
+  private int[][] loadMapFromCSV(String filename) {
+    List<int[]> rows = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] tokens = line.split(",");
+            int[] row = new int[tokens.length];
+            for (int i = 0; i < tokens.length; i++) {
+                row[i] = Integer.parseInt(tokens[i].trim());
+            }
+            rows.add(row);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return rows.toArray(new int[0][]);
+}
     private Random rand = new Random();
     private BossEnemy boss;
     private long bossSpawnTime = -1;
@@ -79,12 +77,40 @@ public class Scene2 extends AbstractGameScene {
                 y = -height;
             }
         }
+void draw(Graphics2D g2d) {
+    // Base crater color
+    Color craterColor = new Color(150, 80, 50, 150);
+    g2d.setColor(craterColor);
+    g2d.fillOval(x, y, width, height);
 
-        void draw(Graphics2D g2d) {
-            Color craterColor = new Color(150, 80, 50, 150);
-            g2d.setColor(craterColor);
-            g2d.fillOval(x, y, width, height);
-        }
+    // Inner shadow (darker ellipse inside the crater)
+    g2d.setColor(new Color(100, 50, 30, 180));
+    g2d.fillOval(x + 4, y + 4, width - 8, height - 8);
+
+    // Crater outline
+    g2d.setColor(new Color(60, 30, 20));
+    g2d.drawOval(x, y, width, height);
+
+    // Add radial lines (angled grooves)
+    int centerX = x + width / 2;
+    int centerY = y + height / 2;
+
+    g2d.setStroke(new BasicStroke(1));
+    g2d.setColor(new Color(80, 40, 30, 180));
+
+    for (int angle = 0; angle < 360; angle += 30) {
+        double rad = Math.toRadians(angle);
+        int outerX = centerX + (int)((width / 2) * Math.cos(rad));
+        int outerY = centerY + (int)((height / 2) * Math.sin(rad));
+        int innerX = centerX + (int)((width / 2 - 6) * Math.cos(rad));
+        int innerY = centerY + (int)((height / 2 - 6) * Math.sin(rad));
+        g2d.drawLine(outerX, outerY, innerX, innerY);
+    }
+
+  
+    g2d.setColor(new Color(40, 20, 10, 220));
+    g2d.fillOval(centerX - 3, centerY - 2, 6, 4);
+}
     }
 
     public Scene2(Game game, Player player, int scoreP1, int scoreP2) {
@@ -92,6 +118,7 @@ public class Scene2 extends AbstractGameScene {
         this.player = player;
         this.scoreP1 = scoreP1;
         this.scoreP2 = scoreP2;
+        this.MAP = loadMapFromCSV(Global.MAP2_CSV);
         setBackground(new Color(0xC86C41));
     }
 
@@ -171,7 +198,7 @@ public class Scene2 extends AbstractGameScene {
             int barY = 20;
             int barWidth = 400;
             int barHeight = 20;
-            int currentWidth = (int) ((boss.getHealth() / 50000.0f) * barWidth);
+            int currentWidth = (int) ((boss.getHealth() / 30000.0f) * barWidth);
 
             g.setColor(Color.DARK_GRAY);
             g.fillRect(barX, barY, barWidth, barHeight);
@@ -228,7 +255,7 @@ public class Scene2 extends AbstractGameScene {
 
         long now = System.currentTimeMillis();
 
-       // Only spawn Alien2 enemies after the boss has entered
+       
 if (boss != null && !boss.isEntering()) {
      alien2SpawnTimer++;
     if (alien2SpawnTimer > 120) {

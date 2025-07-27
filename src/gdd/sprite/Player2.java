@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
 
 public class Player2 extends Sprite {
 
-    private static final int START_X = 370; // Slightly offset from Player 1
+    private static final int START_X = 370; 
     private static final int START_Y = 540;
 
     private double vx = 0;
@@ -26,10 +26,10 @@ public class Player2 extends Sprite {
     private boolean multiShotEnabled = false;
 
     public boolean hasSpeedUp = false;
-    private final double BASE_MAX_SPEED_X = 2;  // Slower start
+    private final double BASE_MAX_SPEED_X = 2;  
     private final double BASE_MAX_SPEED_Y = 1;
 
-    private final double NORMAL_MAX_SPEED_X = 7;  // Normal max speed after power-up
+    private final double NORMAL_MAX_SPEED_X = 7;  
     private final double NORMAL_MAX_SPEED_Y = 6;
 
     private final double FRICTION = 5;
@@ -122,7 +122,7 @@ public class Player2 extends Sprite {
 }
 
 public Rectangle getHitbox() {
-    int padding = 30; // Shrinks the hitbox
+    int padding = 30;
     return new Rectangle(
         getX() + padding,
         getY() + padding,
@@ -170,7 +170,7 @@ public Rectangle getHitbox() {
             ay = ACCEL_Y;
         }
         if (key == KeyEvent.VK_F) {
-            // Shooting handled elsewhere
+           
         }
         if (key == KeyEvent.VK_G) {
             braking = true;
@@ -199,7 +199,6 @@ public Rectangle getHitbox() {
         }
     }
 
-    // New methods for speed control
     public void setMaxSpeed(double maxX, double maxY) {
         this.maxSpeedX = maxX;
         this.maxSpeedY = maxY;

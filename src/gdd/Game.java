@@ -57,7 +57,6 @@ public class Game extends JFrame {
 
     Player currentPlayer = scene1.getPlayer();
 
-    // Get scores from scene1 to pass them to scene2
     int scoreP1 = scene1.getScoreP1();
     int scoreP2 = scene1.getScoreP2();
 

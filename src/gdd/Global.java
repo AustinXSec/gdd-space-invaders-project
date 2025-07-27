@@ -41,5 +41,9 @@ public class Global {
     public static final String IMG_TITLE = "src/images/title_screen.png";
     public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup-s.png";
     
+    //maps 
+    public static final String MAP1_CSV = "src/maps/map.csv";
+    public static final String MAP2_CSV = "src/maps/map2.csv";
+
 
 }
